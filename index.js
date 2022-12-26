@@ -29,6 +29,29 @@ app.get(`/search?s=:id?`, (req, res) => {
     else{ res.send(`{status:500, error:true, message:'you have to provide a search'}`);}
 });
 app.get('/create?', (req,res) => res.send(`{status: 200, message: 'create'}`))
-app.get('/read?', (req,res) => res.send(`{'status': 200, 'message': ${JSON.stringify(movies)}}`))
+app.get('/read', (req,res) => res.send(`{'status': 200, 'message': ${JSON.stringify(movies)}}`));
+app.get('/read/by-date', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('year')}}`))
+app.get('/read/by-rating', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('rating')}}`))
+app.get('/read/by-title', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('title')}}`))
 app.get('/update?', (req,res) => res.send(`{status: 200, message: 'update'}`))
 app.get('/delete?', (req,res) => res.send(`{status: 200, message: 'delete'}`))
+
+function sortMovies(param){
+    let sortedMovies;
+    if(param==='title'){
+        sortedMovies= movies.sort((a,b) => {
+            const nameA = a['title'].toUpperCase(); // ignore upper and lowercase
+            const nameB = b['title'].toUpperCase(); // ignore upper and lowercase
+            if (nameA < nameB) {
+              return -1;
+            }
+            if (nameA > nameB) {
+              return 1;
+            }          
+            return 0;
+          })
+    } else{
+        sortedMovies= movies.sort((a,b) => b[param ]- a[param]);
+    }
+    return JSON.stringify(sortedMovies)
+}
