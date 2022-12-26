@@ -7,3 +7,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`ok`);
 });
+app.get('/test', (req,res) => {res.send(`{status:200, message:"ok"}`)})
+app.get('/time', (req,res)=> res.send(`{status: 200 , message: ${JSON.stringify(new Date()).slice(12,17)}}`))
