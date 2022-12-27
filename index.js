@@ -33,6 +33,7 @@ app.get('/read', (req,res) => res.send(`{'status': 200, 'message': ${JSON.string
 app.get('/read/by-date', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('year')}}`))
 app.get('/read/by-rating', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('rating')}}`))
 app.get('/read/by-title', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('title')}}`))
+app.get('/read/id/:id', (req,res) => res.send(findMovie(req.params.id)))
 app.get('/update?', (req,res) => res.send(`{status: 200, message: 'update'}`))
 app.get('/delete?', (req,res) => res.send(`{status: 200, message: 'delete'}`))
 
@@ -40,8 +41,8 @@ function sortMovies(param){
     let sortedMovies;
     if(param==='title'){
         sortedMovies= movies.sort((a,b) => {
-            const nameA = a['title'].toUpperCase(); // ignore upper and lowercase
-            const nameB = b['title'].toUpperCase(); // ignore upper and lowercase
+            const nameA = a['title'].toUpperCase();
+            const nameB = b['title'].toUpperCase();
             if (nameA < nameB) {
               return -1;
             }
@@ -54,4 +55,9 @@ function sortMovies(param){
         sortedMovies= movies.sort((a,b) => b[param ]- a[param]);
     }
     return JSON.stringify(sortedMovies)
+}
+const findMovie= (id) => {
+  let msg;
+  id<=movies.length-1? msg={'status': 200, 'data': movies[id]}: msg={'status': 404, 'error': `The movie ${id} does not exist`}
+  return JSON.stringify(msg)
 }
