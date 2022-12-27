@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const port = 3000;
-const movies = [
+let movies = [
     { title: 'Jaws', year: 1975, rating: 8 },
     { title: 'Avatar', year: 2009, rating: 7.8 },
     { title: 'Brazil', year: 1985, rating: 8 },
@@ -38,7 +38,7 @@ app.get('/update?', (req,res) => res.send(`{status: 200, message: 'update'}`))
 app.get('/delete?', (req,res) => res.send(`{status: 200, message: 'delete'}`))
 app.get(`/movies/add?title=:title&year=:year&rating=:rating?`, (req,res) => res.send(addMovie(req.params.title, req.params.year, req.params.rating)))
 app.get('/movies/delete/:id?', (req,res) => res.send(deleteMovie(req.params.id)))
-
+app.get('/movies/update/:id?title=:title?&rating=:rating?&year=:year?', (req,res) => res.send(updateMovie(req.params)))
 function sortMovies(param){
     let sortedMovies;
     if(param==='title'){
@@ -82,4 +82,24 @@ const deleteMovie=(id)=> {
   }
   else{msg={'status':403, 'error': true, 'message':`the movie ${id} does not exist`}}
   return JSON.stringify(msg)
+}
+const updateMovie=(params) => {
+  //params=JSON.parse(params);
+  let index;
+  params.id==='0'? index=0 : index=parseInt(params.id)
+  delete params.id
+  let keyValues=Object.entries(params);
+  keyValues.map(attribute => {
+    switch (attribute[0]){
+      case 'year':
+      case 'rating':
+        movies[index][attribute[0]]=parseInt(attribute[1])
+        break;
+      case 'title':
+        movies[index][attribute[0]]=attribute[1]
+        break;
+    }
+  })
+
+ return JSON.stringify(movies)
 }
