@@ -36,6 +36,7 @@ app.get('/read/by-title', (req,res) => res.send(`{'status': 200, 'data': ${sortM
 app.get('/read/id/:id', (req,res) => res.send(findMovie(req.params.id)))
 app.get('/update?', (req,res) => res.send(`{status: 200, message: 'update'}`))
 app.get('/delete?', (req,res) => res.send(`{status: 200, message: 'delete'}`))
+app.get(`/movies/add?title=:title&year=:year&rating=:rating?`, (req,res) => res.send(addMovie(req.params.title, req.params.year, req.params.rating)))
 
 function sortMovies(param){
     let sortedMovies;
@@ -59,5 +60,16 @@ function sortMovies(param){
 const findMovie= (id) => {
   let msg;
   id<=movies.length-1? msg={'status': 200, 'data': movies[id]}: msg={'status': 404, 'error': `The movie ${id} does not exist`}
+  return JSON.stringify(msg)
+}
+
+const addMovie=(title,year,rating=4)=>{
+  let msg;
+  if(!title || year.length!=4 || !year || !parseInt(year)){
+    msg={status:403, error:true, message:'you cannot create a movie without providing a title and a year'}
+  }else{
+    movies.push({title: title, year:year, rating:rating})
+    msg=movies
+  }
   return JSON.stringify(msg)
 }
