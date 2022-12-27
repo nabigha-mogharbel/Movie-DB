@@ -37,6 +37,7 @@ app.get('/read/id/:id', (req,res) => res.send(findMovie(req.params.id)))
 app.get('/update?', (req,res) => res.send(`{status: 200, message: 'update'}`))
 app.get('/delete?', (req,res) => res.send(`{status: 200, message: 'delete'}`))
 app.get(`/movies/add?title=:title&year=:year&rating=:rating?`, (req,res) => res.send(addMovie(req.params.title, req.params.year, req.params.rating)))
+app.get('/movies/delete/:id?', (req,res) => res.send(deleteMovie(req.params.id)))
 
 function sortMovies(param){
     let sortedMovies;
@@ -71,5 +72,14 @@ const addMovie=(title,year,rating=4)=>{
     movies.push({title: title, year:year, rating:rating})
     msg=movies
   }
+  return JSON.stringify(msg)
+}
+const deleteMovie=(id)=> {
+  let msg;
+  if(id && id<movies.length){
+    movies.splice(parseInt(id),1)
+    msg=movies
+  }
+  else{msg={'status':403, 'error': true, 'message':`the movie ${id} does not exist`}}
   return JSON.stringify(msg)
 }
