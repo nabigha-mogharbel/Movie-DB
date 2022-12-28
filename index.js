@@ -28,17 +28,17 @@ app.get(`/search?s=:id?`, (req, res) => {
   if(req.params.id != undefined){res.send(`{status:200, message:"ok", data:${req.params.id}}`)}
     else{ res.send(`{status:500, error:true, message:'you have to provide a search'}`);}
 });
-app.get('/create?', (req,res) => res.send(`{status: 200, message: 'create'}`))
+app.post('/create?', (req,res) => res.send(`{status: 200, message: 'create'}`))
 app.get('/read', (req,res) => res.send(`{'status': 200, 'message': ${JSON.stringify(movies)}}`));
 app.get('/read/by-date', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('year')}}`))
 app.get('/read/by-rating', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('rating')}}`))
 app.get('/read/by-title', (req,res) => res.send(`{'status': 200, 'data': ${sortMovies('title')}}`))
 app.get('/read/id/:id', (req,res) => res.send(findMovie(req.params.id)))
-app.get('/update?', (req,res) => res.send(`{status: 200, message: 'update'}`))
-app.get('/delete?', (req,res) => res.send(`{status: 200, message: 'delete'}`))
-app.get(`/movies/add?title=:title&year=:year&rating=:rating?`, (req,res) => res.send(addMovie(req.params.title, req.params.year, req.params.rating)))
-app.get('/movies/delete/:id?', (req,res) => res.send(deleteMovie(req.params.id)))
-app.get('/movies/update/:id?title=:title?&rating=:rating?&year=:year?', (req,res) => res.send(updateMovie(req.params)))
+app.put('/update?', (req,res) => res.send(`{status: 200, message: 'update'}`))
+app.delete('/delete?', (req,res) => res.send(`{status: 200, message: 'delete'}`))
+app.post(`/movies/add?title=:title&year=:year&rating=:rating?`, (req,res) => res.send(addMovie(req.params.title, req.params.year, req.params.rating)))
+app.delete('/movies/delete/:id?', (req,res) => res.send(deleteMovie(req.params.id)))
+app.put('/movies/update/:id?title=:title?&rating=:rating?&year=:year?', (req,res) => res.send(updateMovie(req.params)))
 function sortMovies(param){
     let sortedMovies;
     if(param==='title'){
