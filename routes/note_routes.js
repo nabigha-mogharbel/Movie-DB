@@ -2,29 +2,13 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const db = require("../config/db");
 
 module.exports = function (app) {
-  app.get("/read", async (req, res) => {
-    let sortedMovies = [];
-    let curs;
-    const client = new MongoClient(db.url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverApi: ServerApiVersion.v1,
-    });
-    try {
-      await client.connect();
-      console.log("Connected correctly to server");
-      const col = client.db("movieDB").collection("movies");
-      curs = col.find({});
-      await curs.forEach((movie) => sortedMovies.push(movie));
-      sortedMovies.map((movie) => delete movie["_id"]);
-      res.send(`{'status': 200, 'data': ${JSON.stringify(sortedMovies)}}`);
-    } catch (e) {
-      res.send(`{status: 405, error:true, message:${e}}`);
-    } finally {
-      await client.close();
-      console.log("closing");
-    }
-  });
+  app.get('/read', (req,res) => {
+    getMovies().then(
+      function(value) {res.send(asyncWrapper(value));},
+      function(error) {res.send((error));}
+    )
+  }
+  )
   app.get("/read/:sorting", async (req, res) => {
     let sortedMovies = [];
     let curs;
@@ -177,3 +161,29 @@ module.exports = function (app) {
     }
   });
 };
+function asyncWrapper(promiseValue){
+  let data=promiseValue;
+  return data
+}
+async function getMovies( ) {
+  const client = new MongoClient(db.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverApi: ServerApiVersion.v1,
+  });
+  let movies=[];
+  try {
+    await client.connect();
+    console.log("Connected correctly to server");
+    const col = client.db("movieDB").collection("movies");
+    let curs = col.find({});
+    await curs.forEach((movie) => movies.push(movie));
+    movies.map((movie) => delete movie["_id"]);
+    return(movies);
+  } catch (e) {
+    return(`{status: 405, error:true, message:${e}}`)
+  } finally {
+    await client.close();
+    console.log("closing");
+  }
+}
