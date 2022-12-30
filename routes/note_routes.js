@@ -49,37 +49,11 @@ module.exports = function (app) {
       function (error) {res.send(asyncWrapper(error))}
     )
   });
-  app.put("/movies/update/:id?", async (req, res) => {
-    let newMovieList = [];
-    let curs;
-    const client = new MongoClient(db.url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverApi: ServerApiVersion.v1,
-    });
-    let fields = { title: "", year: 2003, rating: 4 };
-    req.query.title ? (fields.title = req.query.title) : delete fields.title;
-    req.query.year
-      ? (fields.year = parseInt(req.query.year))
-      : delete fields.year;
-    req.query.rating
-      ? (fields.rating = parseInt(req.query.rating))
-      : delete fields.rating;
-    try {
-      await client.connect();
-      console.log("connected");
-      const col = client.db("movieDB").collection("movies");
-      await col.updateOne({ index: parseInt(req.params.id) }, { $set: fields });
-      curs = col.find({});
-      await curs.forEach((movie) => newMovieList.push(movie));
-      newMovieList.map((movie) => delete movie["_id"]);
-      res.send(`{status:200, data:${JSON.stringify(newMovieList)}}`);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      await client.close();
-      console.log("closing");
-    }
+  app.put("/movies/update/:id?", (req, res) => {
+    updateMovie(req.params.id, req.query).then(
+      function(value) {res.send(asyncWrapper(value))},
+      function (error) {res.send(asyncWrapper(error))}
+    )
   });
 };
 
@@ -230,6 +204,40 @@ async function deleteMovieById(id){
       return(`{status:404, error:true, message: ${e}}`)    
     } 
       finally {
+      await client.close();
+      console.log("closing");
+    }
+};
+
+
+async function updateMovie(id,params){
+  let newMovieList = [];
+    let curs;
+    const client = new MongoClient(db.url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverApi: ServerApiVersion.v1,
+    });
+    let fields = { title: "", year: 2003, rating: 4 };
+    params.title ? (fields.title = params.title) : delete fields.title;
+    params.year
+      ? (fields.year = parseInt(params.year))
+      : delete fields.year;
+    params.rating
+      ? (fields.rating = parseInt(params.rating))
+      : delete fields.rating;
+    try {
+      await client.connect();
+      console.log("connected");
+      const col = client.db("movieDB").collection("movies");
+      await col.updateOne({ index: parseInt(id) }, { $set: fields });
+      curs = col.find({});
+      await curs.forEach((movie) => newMovieList.push(movie));
+      newMovieList.map((movie) => delete movie["_id"]);
+      return(`{status:200, data:${JSON.stringify(newMovieList)}}`);
+    } catch (e) {
+      return(e);
+    } finally {
       await client.close();
       console.log("closing");
     }
