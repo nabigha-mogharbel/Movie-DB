@@ -2,7 +2,15 @@ const express = require("express");
 const app = express();
 const port = 3000;
 app.use(express.json());
-require("./routes/note_routes")(app);
+const users=require('./middleware/users')
+require("./routes/movies_routes")(app);
+require("./routes/user_routes")(app, users);
+const bodyParser = require('body-parser');
+const cookieParser=require('cookie-parser')
+app.use(cookieParser())
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.get("/", (req, res) => {
   res.send("ok");
 });
