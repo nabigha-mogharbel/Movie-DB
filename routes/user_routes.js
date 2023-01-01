@@ -1,6 +1,5 @@
 const jwt=require('jsonwebtoken')
 const bcrypt=require('bcrypt')
-//$2b$10$1mmeKgA9KNqX6CuH5f2Exue1v/bSaeOXywxwrRfqhwQC9y2zM9CTK
 require('dotenv').config()
 const auth=require('../middleware/auth')
 module.exports = function(app, database){
@@ -25,16 +24,11 @@ module.exports = function(app, database){
         }
     })
     app.delete('/user/delete', auth, async (req, res) => {
-        let cookie = req.headers.cookie;
-       let splitted=cookie.split('=');
-       cookie=splitted[1]
-       console.log(cookie)
-       let isVeri= await jwt.verify(cookie, process.env.TOKEN_SECRET)
        try{
         const fs = require("fs");
-        let data = fs.readFileSync('/home/nabigha/Desktop/Codi/Movie-DB/routes/users.json');
+        let data = fs.readFileSync(process.env.DATABASEPATH);
         let dataJSON=JSON.parse(data)
-         let isExact= await bcrypt.compare(req.query.password, dataJSON.users[isVeri.userID].password)
+         let isExact= await bcrypt.compare(req.query.password, dataJSON.users[res.locals.index].password)
         if(isExact){
             dataJSON.users.splice(1, 1);
             const fs=require('fs')
@@ -47,25 +41,26 @@ module.exports = function(app, database){
        }catch(e){
         res.send(e)
        }
-       
     });
     app.post('/user/logout', async (req, res) => {
         res.cookie('token', '', { maxAge: 2 * 60 * 60 * 1000, httpOnly: true })
         res.send('logged out')
     })
     app.put('/user/update', auth, async (req,res) => {
-        let cookie = req.headers.cookie;
-        let splitted=cookie.split('=');
-       cookie=splitted[1]
-       const isVeri = jwt.verify(cookie, process.env.TOKEN_SECRET)
        const fs = require("fs");
        let data = fs.readFileSync(process.env.DATABASEPATH);
        let dataJSON=JSON.parse(data)
-        if(req.query.newPassword){
-            dataJSON.users[isVeri.userID]=await bcrypt.hash(req.query.newPassword, process.env.SALT)
+        if(req.query.newPassword && req.query.newUsername){
+            dataJSON.users[res.locals.index].password=await bcrypt.hash(req.query.newPassword, process.env.SALT);
+            dataJSON.users[res.locals.index].username= req.query.newUsername;
+            res.send('updated your account');
         }
-        if(req.query.newUsername){
-            dataJSON.users[isVeri.userID].username= req.query.newUsername;
+        else if(req.query.newUsername){
+            dataJSON.users[res.locals.index].username= req.query.newUsername;
+            res.send('updated your account');
+        }
+        else if(req.query.newPassword){
+            dataJSON.users[res.locals.index].password=await bcrypt.hash(req.query.newPassword, process.env.SALT);
             res.send('updated your account');
         }
         fs.writeFileSync(process.env.DATABASEPATH, JSON.stringify(dataJSON))
